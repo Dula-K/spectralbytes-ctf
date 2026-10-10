@@ -1,0 +1,4 @@
+**/build/out/
+**/.secrets.env
+*.pyc
+__pycache__/

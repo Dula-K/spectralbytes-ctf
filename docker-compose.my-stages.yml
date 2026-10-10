@@ -1,0 +1,56 @@
+# Services for S02, S04 and S06 — merge these into the team's main
+# docker-compose.yml alongside S01, S03, S05 and the CTFd control plane.
+# Ports match section 7.2 of the report exactly.
+
+services:
+  s02-steganography:
+    build: ./s02-steganography
+    container_name: spectralbytes-s02
+    ports:
+      - "2222:22"
+    networks:
+      - challenge-net
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN       # needed only at image build time; safe to drop further if unused at runtime
+    read_only: false  # steghide/exiftool challenge files are static; set true once confirmed unneeded
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 128
+
+  s04-forensics:
+    build: ./s04-forensics
+    container_name: spectralbytes-s04
+    ports:
+      - "2224:22"
+    networks:
+      - challenge-net
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 128
+
+  s06-linux:
+    build: ./s06-linux
+    container_name: spectralbytes-s06
+    ports:
+      - "2226:22"
+    networks:
+      - challenge-net
+    restart: unless-stopped
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    mem_limit: 512m
+    cpus: 0.5
+    pids_limit: 128
+
+networks:
+  challenge-net:
+    driver: bridge
+    internal: true   # no outbound egress from challenge containers, per report section 9.2
